@@ -1,0 +1,56 @@
+/* ============================================================
+   Skyperp — canonical design tokens
+   ------------------------------------------------------------
+   The single source of truth for the Skyperp visual identity.
+   The public-facing HTML artifacts (site/index.html, the
+   pitch overview, investor deck, protocol writeups) already
+   follow these values. New artifacts should @import this file
+   or copy the :root block so the look stays coherent.
+
+   Audience note: the academic whitepaper and academic system
+   diagram intentionally use a light/serif treatment. That is a
+   deliberate register shift, not drift — do not "fix" them.
+   ============================================================ */
+
+:root {
+  /* Surfaces — near-black, slightly cool */
+  --bg:        #0f0f11;
+  --surface:   #1a1a1f;
+  --surface-2: #222228;
+  --code-bg:   #16161a;
+
+  /* Text */
+  --text:      #e4e4e7;
+  --text-sec:  #a1a1aa;
+  --text-muted:#71717a;
+
+  /* Accent — amber/gold is the brand color */
+  --accent:       #f59e0b;
+  --accent-2:     #fbbf24;
+  --accent-dim:   rgba(245,158,11,0.12);
+  --accent-glow:  rgba(245,158,11,0.06);
+  --border-accent:rgba(245,158,11,0.30);
+
+  /* Semantic — pass / pending / fail */
+  --green:   #22c55e;   /* kill criterion passed, gate closed */
+  --amber:   #f59e0b;   /* conditional / in progress */
+  --red:     #ef4444;   /* failed / killed */
+  --indigo:  #6366f1;   /* secondary accent (Solana-adjacent) */
+  --solana:  #9945ff;   /* substrate references */
+
+  /* Borders & radius */
+  --border:    #2a2a32;
+  --radius:    8px;
+  --radius-lg: 12px;
+
+  /* Type — Space Grotesk display, DM Sans body, JetBrains mono */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --max: 880px;
+}
+
+/* Fonts used across artifacts:
+   https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap */

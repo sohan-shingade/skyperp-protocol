@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyperp - Perpetual Futures for Prediction Markets</title>
+<meta name="description" content="Continuous scalar pricing with leverage on real-world data feeds. Trade the magnitude, not the yes/no.">
+<meta property="og:title" content="Skyperp - Perpetual Futures for Prediction Markets">
+<meta property="og:description" content="Continuous scalar pricing with leverage on real-world data feeds. Weather is the first market. No expiry, no binary outcomes.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Skyperp">
+<meta name="twitter:description" content="Perpetual futures for prediction markets. Continuous, leveraged, no expiry.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f11;--surface:#1a1a1f;--surface-2:#222228;
+  --text:#e4e4e7;--text-sec:#a1a1aa;--text-muted:#71717a;
+  --accent:#f59e0b;--accent-dim:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.06);
+  --indigo:#6366f1;--indigo-dim:rgba(99,102,241,0.1);
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.1);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.08);
+  --border:#2a2a32;--border-accent:rgba(245,158,11,0.3);
+  --code-bg:#16161a;
+  --max:880px;--radius:8px;--radius-lg:12px;
+}
+html{font-size:15px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--surface-2) transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;-webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--indigo));z-index:1000;transition:width 80ms linear;width:0}
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,15,17,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 24px}
+#nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:54px}
+#nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:-0.02em}
+#nav .logo span{color:var(--accent)}
+#nav .nav-links{display:flex;gap:20px;align-items:center}
+#nav .nav-links a{font-size:0.8rem;color:var(--text-muted);text-decoration:none;transition:color .15s}
+#nav .nav-links a:hover{color:var(--accent)}
+main{max-width:var(--max);margin:0 auto;padding:96px 24px 120px}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:1.15}
+h2{font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;margin:40px 0 8px;line-height:1.3}
+h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;margin:24px 0 8px}
+h4{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:var(--text-sec);margin:20px 0 8px}
+p{color:var(--text-sec);margin:0 0 14px}
+ul,ol{color:var(--text-sec);padding-left:22px;margin:0 0 14px}
+li{margin:5px 0;line-height:1.6}
+strong{color:var(--text)}
+a{color:var(--accent);text-decoration:none}
+hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+
+/* Hero */
+.hero{padding:48px 0 36px}
+.hero .kicker{font-size:0.82rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px}
+.hero h1{font-size:clamp(2.2rem,5vw,3rem);margin-bottom:18px}
+.hero .lead{font-size:1.1rem;color:var(--text-sec);max-width:640px;line-height:1.6;margin-bottom:0}
+.hero .lead em{color:var(--text);font-style:normal;font-weight:600}
+
+/* The big idea block */
+.big-idea{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin:20px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.big-idea .col{text-align:center}
+.big-idea .col .icon{font-size:2rem;margin-bottom:8px}
+.big-idea .col h4{color:var(--text);font-size:0.95rem;margin:0 0 6px}
+.big-idea .col p{font-size:0.82rem;color:var(--text-muted);margin:0;line-height:1.5}
+
+/* Contrast block */
+.contrast{display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin:24px 0;align-items:center}
+.contrast-side{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.contrast-side h4{margin:0 0 8px;font-size:0.92rem}
+.contrast-side p{font-size:0.82rem;color:var(--text-muted);margin:0;line-height:1.5}
+.contrast-vs{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text-muted);padding:0 16px;text-align:center}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:14px;transition:border-color .15s}
+.card:hover{border-color:rgba(245,158,11,0.2)}
+
+/* Stat grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}
+.stat-card .value{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:700;color:var(--accent);margin-bottom:3px}
+.stat-card .label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;line-height:1.4}
+.stat-card.pass{border-color:rgba(34,197,94,0.3)}.stat-card.pass .value{color:var(--green)}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:0.84rem}
+th{text-align:left;padding:10px 14px;background:var(--surface);color:var(--text);font-weight:600;border-bottom:2px solid var(--border);font-size:0.76rem;text-transform:uppercase;letter-spacing:0.04em}
+td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text-sec);vertical-align:top}
+tr:hover td{background:var(--accent-glow)}
+
+/* Code */
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin:14px 0;overflow-x:auto;line-height:1.55}
+pre code{font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text-sec)}
+/* Syntax highlighting */
+.hl-kw{color:#c084fc} /* keywords: if, const, where */
+.hl-fn{color:#60a5fa} /* functions/identifiers */
+.hl-num{color:#f59e0b} /* numbers */
+.hl-str{color:#34d399} /* strings */
+.hl-cm{color:#71717a;font-style:italic} /* comments */
+.hl-op{color:#a1a1aa} /* operators */
+.hl-var{color:#e4e4e7} /* variables */
+code{font-family:'JetBrains Mono',monospace;font-size:0.84em;background:var(--code-bg);padding:2px 6px;border-radius:4px;color:var(--accent)}
+
+/* Three-price */
+.price-arch{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}
+.price-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;position:relative}
+.price-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.price-box.oracle::before{background:var(--green)}.price-box.oracle h4{color:var(--green)}
+.price-box.mark::before{background:var(--accent)}.price-box.mark h4{color:var(--accent)}
+.price-box.trade::before{background:var(--indigo)}.price-box.trade h4{color:var(--indigo)}
+.price-box p{font-size:0.8rem;color:var(--text-muted);line-height:1.5}
+.price-box .used-for{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:0.73rem;color:var(--text-sec)}
+.price-box .used-for strong{color:var(--text)}
+
+/* Callout */
+.callout{border-left:3px solid var(--accent);padding:12px 16px;margin:18px 0;background:var(--accent-glow);border-radius:0 var(--radius) var(--radius) 0}
+.callout p{color:var(--text-sec);font-size:0.88rem;margin:0}
+.callout.warning{border-left-color:var(--red);background:var(--red-dim)}
+.callout.info{border-left-color:var(--indigo);background:var(--indigo-dim)}
+
+/* Diagram */
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin:20px 0;overflow-x:auto}
+.diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.diagram-caption{font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:12px;font-style:italic}
+
+/* Funding examples */
+.funding-examples{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.funding-ex{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.funding-ex .regime{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:3px}
+.funding-ex .values{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-sec)}
+.funding-ex .rate{font-weight:600;color:var(--accent);margin-top:3px;font-size:0.85rem}
+
+/* PnL */
+.pnl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.pnl-ex{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.pnl-ex .setup{font-size:0.76rem;color:var(--text-muted);margin-bottom:4px}
+.pnl-ex .result{font-family:'JetBrains Mono',monospace;font-size:0.88rem;font-weight:600}
+.pnl-ex .result.profit{color:var(--green)}.pnl-ex .result.loss{color:var(--red)}
+
+/* Sequence steps */
+.seq-step{display:flex;align-items:flex-start;gap:12px;margin:8px 0;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.seq-step .step-num{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--accent);font-weight:600;min-width:24px;padding-top:2px}
+.seq-step .step-content{font-size:0.82rem;color:var(--text-sec);line-height:1.5}
+.seq-step .step-content strong{color:var(--text)}
+
+/* Flow */
+.flow-horizontal{display:flex;align-items:center;gap:0;margin:20px 0;overflow-x:auto;padding:12px 0}
+.flow-node{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;text-align:center;white-space:nowrap;flex-shrink:0}
+.flow-node .node-title{font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600}
+.flow-node .node-sub{font-size:0.7rem;color:var(--text-muted);margin-top:2px}
+.flow-node.highlight{border-color:var(--accent);background:var(--accent-dim)}
+.flow-node.highlight .node-title{color:var(--accent)}
+.flow-arrow{color:var(--text-muted);font-size:1.1rem;padding:0 6px;flex-shrink:0}
+
+/* Risk cards */
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
+.risk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.risk-card .risk-num{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text-muted);opacity:0.4;margin-bottom:2px}
+.risk-card h4{font-size:0.88rem;font-weight:600;margin-bottom:5px}
+.risk-card .risk-desc{font-size:0.78rem;color:var(--text-muted);line-height:1.5;margin:0 0 8px}
+.risk-card .risk-rebuttal{font-size:0.78rem;color:var(--text-sec);line-height:1.5;padding-top:8px;border-top:1px solid var(--border);margin:0}
+.risk-card .risk-rebuttal strong{color:var(--accent);font-weight:600}
+
+/* Timeline */
+.timeline{margin:20px 0;padding-left:22px;border-left:2px solid var(--border)}
+.timeline-item{position:relative;padding:0 0 24px 18px}
+.timeline-item::before{content:'';position:absolute;left:-27px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--border)}
+.timeline-item.done::before{background:var(--green);border-color:var(--green)}
+.timeline-item.active::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 6px var(--accent)}
+.timeline-item.future::before{background:var(--surface);border-color:var(--text-muted)}
+.timeline-item .tl-date{font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em}
+.timeline-item .tl-title{font-weight:600;font-size:0.9rem;margin:1px 0}
+.timeline-item .tl-desc{font-size:0.8rem;color:var(--text-muted)}
+
+/* Feedback */
+.feedback-section{background:var(--surface);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:28px;margin:28px 0}
+.feedback-section h3{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:600;color:var(--accent);margin:0 0 14px}
+.q-group{margin-bottom:20px}
+.q-group .q-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);font-weight:600;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.q-group ol{padding-left:18px;color:var(--text-sec);font-size:0.86rem}
+.q-group ol li{margin:5px 0;line-height:1.5}
+
+/* Footer */
+.footer{text-align:center;padding:40px 0;border-top:1px solid var(--border);margin-top:56px}
+.footer .contact{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:600;margin-bottom:6px}
+.footer .email{color:var(--accent);font-size:0.95rem}
+.footer .note{font-size:0.76rem;color:var(--text-muted);margin-top:14px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+/* Responsive */
+@media(max-width:768px){
+  .big-idea{grid-template-columns:1fr}
+  .contrast{grid-template-columns:1fr;gap:12px}
+  .contrast-vs{padding:4px 0}
+  .price-arch,.funding-examples,.pnl-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .risk-grid{grid-template-columns:1fr}
+  #nav .nav-links{display:none}
+  main{padding:76px 16px 80px}
+}
+@media print{
+  #nav,#progress{display:none}
+  body{background:#fff;color:#1a1a1a;font-size:11pt}
+  main{padding:0;max-width:100%}
+  .card,.stat-card,.price-box,.funding-ex,.risk-card,.pnl-ex,.feedback-section,.callout,.diagram,.seq-step,.big-idea,.contrast-side{background:#f5f5f5;border-color:#ddd;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  h2{page-break-after:avoid}
+  .diagram,.table-wrap{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav">
+<div id="nav-inner">
+  <div class="logo">Sky<span>perp</span></div>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#deep-dive">Deep Dive</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#risks">Risks</a>
+    <a href="#feedback">Feedback</a>
+  </div>
+</div>
+</nav>
+
+<main>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="kicker">A new kind of derivative</div>
+  <h1>Perpetual Futures for Prediction Markets</h1>
+  <p class="lead">Prediction markets give you binary outcomes: <em>yes or no, fixed payout</em>. Skyperp gives you <em>continuous scalar pricing, leverage, and no expiry</em>. Trade the degree-by-degree forecast, not the yes/no question. Hold as long as you want. Size your conviction.</p>
+</div>
+
+<div class="big-idea">
+  <div class="col">
+    <div class="icon">&#x1F4C8;</div>
+    <h4>Continuous</h4>
+    <p>Scalar pricing, not binary. Trade the magnitude of an outcome, not just whether it happens.</p>
+  </div>
+  <div class="col">
+    <div class="icon">&#x26A1;</div>
+    <h4>Leveraged</h4>
+    <p>5x at launch, configurable per market. Express conviction with capital efficiency, from small clips to sizable positions.</p>
+  </div>
+  <div class="col">
+    <div class="icon">&#x221E;</div>
+    <h4>Perpetual</h4>
+    <p>No expiry date. No resolution event. Rolling horizon with funding rate. Hold indefinitely.</p>
+  </div>
+</div>
+
+<div class="contrast">
+  <div class="contrast-side">
+    <h4>Prediction market</h4>
+    <p>"Will NYC hit 100&deg;F next Tuesday?"<br>Answer: Yes (60&cent;) or No (40&cent;)<br>Payout: fixed $1 if right, $0 if wrong<br>Resolution: event date, then it's gone</p>
+  </div>
+  <div class="contrast-vs">vs.</div>
+  <div class="contrast-side" style="border-color:var(--border-accent)">
+    <h4 style="color:var(--accent)">Skyperp</h4>
+    <p>"NYC 7-day forecast is +5.2&deg;F above normal"<br>Trade: go long or short at any level<br>Payout: $10 per degree per contract, continuous<br>Horizon: rolling, no resolution, carry replaces settlement</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== HOW IT WORKS ==================== -->
+<div id="how">
+  <h2>How It Works</h2>
+  <p>Skyperp applies the perpetual futures mechanic (the dominant instrument in crypto, >$100B daily volume) to real-world data feeds where no spot market exists.</p>
+
+  <h3>The First Market: Weather Forecast Anomaly</h3>
+  <p>Weather is the first market because the data is free, published by three independent government agencies (impossible to manipulate), and has 26 years of regulatory precedent at the CFTC. The platform generalizes to energy demand, agricultural yield, economic indicators, and any observable with a reliable data feed.</p>
+
+  <pre><code><span class="hl-cm">// What the index measures:</span>
+<span class="hl-var">anomaly</span> <span class="hl-op">=</span> <span class="hl-fn">forecast_max_temp</span>(<span class="hl-num">7</span> days ahead) <span class="hl-op">-</span> <span class="hl-fn">climatological_normal</span>
+
+<span class="hl-cm">// Three independent sources, trimmed mean (median of 3):</span>
+<span class="hl-var">index</span> <span class="hl-op">=</span> <span class="hl-fn">median</span>(<span class="hl-str">NOAA_GFS</span>, <span class="hl-str">ECMWF</span>, <span class="hl-str">DWD_ICON</span>)
+
+<span class="hl-cm">// Unit: degrees Fahrenheit. Range: typically -15 to +15. Crosses zero regularly.</span>
+<span class="hl-cm">// Updates 4x daily, synced to operational weather model runs.</span></code></pre>
+
+  <h3>The Contract</h3>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="value">$10</div><div class="label">per &deg;F per contract</div></div>
+    <div class="stat-card"><div class="value">0.1&deg;F</div><div class="label">tick size ($1.00)</div></div>
+    <div class="stat-card"><div class="value">5x</div><div class="label">at launch (configurable)</div></div>
+    <div class="stat-card"><div class="value">&infin;</div><div class="label">no expiry</div></div>
+  </div>
+
+  <h3>Concrete Examples</h3>
+  <pre><code><span class="hl-var">pnl</span> <span class="hl-op">=</span> (<span class="hl-fn">current_index</span> <span class="hl-op">-</span> <span class="hl-fn">entry_price</span>) <span class="hl-op">&times;</span> <span class="hl-var">contracts</span> <span class="hl-op">&times;</span> <span class="hl-num">$10</span> <span class="hl-op">&times;</span> <span class="hl-var">direction</span></code></pre>
+
+  <div class="pnl-grid">
+    <div class="pnl-ex"><div class="setup">Long 10 contracts @ +2.0&deg;F. Index moves to +5.0&deg;F.</div><div class="result profit">+$300</div></div>
+    <div class="pnl-ex"><div class="setup">Long 10 contracts @ +2.0&deg;F. Index drops to -1.0&deg;F.</div><div class="result loss">&minus;$300</div></div>
+    <div class="pnl-ex"><div class="setup">Short 5 contracts @ -3.0&deg;F. Index drops to -6.0&deg;F.</div><div class="result profit">+$150</div></div>
+    <div class="pnl-ex"><div class="setup">Long 10 @ -2.0&deg;F. Index rises to +1.0&deg;F. Works cleanly through zero.</div><div class="result profit">+$300</div></div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Rolling horizon:</strong> Every day, the contract's reference shifts forward one day. Monday: you're trading "next Monday's forecast." Tuesday: "next Tuesday's forecast." The position never resolves. Funding rate pulls the market toward the oracle value, replacing settlement.</p>
+  </div>
+
+  <h3>Who Trades This</h3>
+  <ul>
+    <li><strong>Crypto perp traders</strong> looking for uncorrelated alpha. Weather anomaly has near-zero correlation with crypto markets.</li>
+    <li><strong>Prediction market power users</strong> who want continuous, leveraged exposure instead of binary bets.</li>
+    <li><strong>Weather-sensitive businesses</strong> (energy, agriculture, events) who want sub-$10K hedging unavailable on CME.</li>
+    <li><strong>Quant traders</strong> who can model NWP forecast error and trade the revision.</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== WHY DIFFERENT ==================== -->
+<div>
+  <h2>Why This Doesn't Exist Yet</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th></th><th>CME Weather</th><th>Polymarket / Kalshi</th><th>Crypto Perps (Drift, Hyperliquid)</th><th>Skyperp</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pricing</strong></td><td>Monthly settlement</td><td>Binary (yes/no)</td><td>Continuous</td><td><strong>Continuous scalar</strong></td></tr>
+      <tr><td><strong>Leverage</strong></td><td>Institutional only</td><td>None</td><td>Up to 100x</td><td><strong>5x at launch (configurable)</strong></td></tr>
+      <tr><td><strong>Minimum size</strong></td><td>$6,000+</td><td>$1</td><td>~$10</td><td><strong>$10</strong></td></tr>
+      <tr><td><strong>Expiry</strong></td><td>Monthly</td><td>Event date</td><td>Never</td><td><strong>Never</strong></td></tr>
+      <tr><td><strong>Underlying</strong></td><td>Weather (HDD/CDD)</td><td>Anything (binary)</td><td>Crypto tokens</td><td><strong>Any real-world data feed</strong></td></tr>
+      <tr><td><strong>Access</strong></td><td>Institutional terminal</td><td>Web app</td><td>Onchain</td><td><strong>Onchain (Solana)</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>What Made This Possible Now</h3>
+  <ul>
+    <li><strong>Ventuals</strong> proved perps work on non-tradable indices: $215M+ cumulative volume in 4 months on Hyperliquid, on custom indices with no spot market.</li>
+    <li><strong>ECMWF</strong> released forecast data under CC-BY-4.0 (Oct 2025). All three data sources now free for commercial use.</li>
+    <li><strong>CFTC</strong> perpetual futures rulemaking expected mid-2026. Coinbase self-certified perp-style futures Jul 2025.</li>
+    <li><strong>Ostium</strong> reached $33B cumulative on tradfi RWA perps in one year ($20M Series A from General Catalyst + Jump).</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== TECHNICAL DEEP DIVE ==================== -->
+<div id="deep-dive">
+  <h2>Technical Deep Dive</h2>
+  <p>This section is for people who want to understand the mechanism. If you trade perps, build protocols, or evaluate derivatives systems, this is the substance.</p>
+
+  <h3>The Oracle: Three Separate Prices</h3>
+  <p>A naive approach blends external data with on-exchange trading into one composite oracle. That's circular -- the exchange's own trading feeds back into the oracle that determines PnL. Skyperp uses three completely independent prices:</p>
+
+  <div class="price-arch">
+    <div class="price-box oracle">
+      <h4>Oracle Index</h4>
+      <p>100% external. Trimmed mean of three independent government agency forecasts (NOAA, ECMWF, DWD). Cannot be manipulated via on-exchange activity.</p>
+      <div class="used-for"><strong>Used for:</strong> PnL, liquidation triggers, liquidation execution</div>
+    </div>
+    <div class="price-box mark">
+      <h4>Mark Price</h4>
+      <p>2-hour EMA of orderbook trades, hard-clamped to oracle &plusmn; max deviation. Can drift, but can't escape oracle gravity.</p>
+      <div class="used-for"><strong>Used for:</strong> Funding rate calculation only</div>
+    </div>
+    <div class="price-box trade">
+      <h4>Trade Price</h4>
+      <p>Phoenix CLOB fill price. Whatever the orderbook gives you at execution.</p>
+      <div class="used-for"><strong>Used for:</strong> Entry/exit price, realized PnL</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Why this matters:</strong> If someone manipulates orderbook trading, they can only affect funding rates (which are bounded by caps). They cannot affect PnL, trigger liquidations, or corrupt the oracle. The oracle is externally anchored.</p>
+  </div>
+
+  <h3>Funding Rate: How Carry Replaces Settlement</h3>
+  <p>In traditional perps, funding pulls the mark toward spot. Skyperp has no spot market, so funding pulls the mark toward the external oracle instead.</p>
+  <p>Standard funding formulas divide by price, which breaks when the underlying crosses zero. This index crosses zero regularly. Skyperp uses absolute divergence:</p>
+
+  <pre><code><span class="hl-var">funding_rate</span> <span class="hl-op">=</span> <span class="hl-fn">clamp</span>(<span class="hl-var">K</span> <span class="hl-op">&times;</span> (<span class="hl-var">mark</span> <span class="hl-op">-</span> <span class="hl-var">oracle</span>) <span class="hl-op">&times;</span> <span class="hl-var">multiplier</span>, <span class="hl-op">-</span><span class="hl-var">max_rate</span>, <span class="hl-op">+</span><span class="hl-var">max_rate</span>)
+
+<span class="hl-var">K</span>         <span class="hl-op">=</span> <span class="hl-num">0.1%</span> per &deg;F per hour
+<span class="hl-var">max_rate</span>  <span class="hl-op">=</span> <span class="hl-num">0.5%</span> per hour
+<span class="hl-var">multiplier</span> <span class="hl-op">=</span> <span class="hl-num">1x</span> (normal) <span class="hl-op">/</span> <span class="hl-num">2x</span> (<span class="hl-num">2-4</span>&deg;F divergence) <span class="hl-op">/</span> <span class="hl-num">3x</span> (<span class="hl-op">&gt;</span><span class="hl-num">4</span>&deg;F divergence)</code></pre>
+
+  <div class="funding-examples">
+    <div class="funding-ex"><div class="regime">Normal regime</div><div class="values">Oracle +3.0, Mark +3.8, div = 0.8&deg;F</div><div class="rate">0.08%/hr</div></div>
+    <div class="funding-ex"><div class="regime">At zero</div><div class="values">Oracle 0.0, Mark +0.3, div = 0.3&deg;F</div><div class="rate">0.03%/hr</div></div>
+    <div class="funding-ex"><div class="regime">Negative index</div><div class="values">Oracle -2.0, Mark -1.5, div = 0.5&deg;F</div><div class="rate">0.05%/hr</div></div>
+    <div class="funding-ex"><div class="regime">Typical carry cost</div><div class="values">1&deg;F divergence = 2.4%/day</div><div class="rate">0.85%/7d at 1x leverage</div></div>
+  </div>
+
+  <h3>Position Sizing &amp; Margin</h3>
+  <p>Traditional "notional value" (price &times; quantity) is meaningless when the price can be zero. Skyperp uses <strong>position risk</strong>: a bounded measure of maximum exposure.</p>
+
+  <pre><code><span class="hl-var">position_risk</span> <span class="hl-op">=</span> <span class="hl-var">contracts</span> <span class="hl-op">&times;</span> <span class="hl-num">$10</span> <span class="hl-op">&times;</span> <span class="hl-num">20</span>&deg;F <span class="hl-op">=</span> <span class="hl-var">contracts</span> <span class="hl-op">&times;</span> <span class="hl-num">$200</span>
+<span class="hl-cm">// 10 contracts = $2,000 position risk regardless of current index level</span></code></pre>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Tier</th><th>Position Risk</th><th>Max Leverage</th><th>Initial Margin</th><th>Maintenance</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>&le; $5,000</td><td>5.0x</td><td>20%</td><td>10%</td></tr>
+      <tr><td>2</td><td>&le; $50,000</td><td>3.0x</td><td>33%</td><td>20%</td></tr>
+      <tr><td>3</td><td>&gt; $50,000</td><td>2.0x</td><td>50%</td><td>30%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Liquidation</h3>
+  <pre><code><span class="hl-cm">// Trigger (checked continuously):</span>
+<span class="hl-var">equity</span> <span class="hl-op">=</span> <span class="hl-var">margin</span> <span class="hl-op">+</span> <span class="hl-fn">unrealized_pnl</span>(<span class="hl-kw">at</span> <span class="hl-var">oracle</span>) <span class="hl-op">+</span> <span class="hl-var">accumulated_funding</span>
+<span class="hl-kw">IF</span> <span class="hl-var">equity</span> <span class="hl-op">&lt;</span> <span class="hl-var">position_risk</span> <span class="hl-op">&times;</span> <span class="hl-var">maintenance_margin</span> <span class="hl-op">&rarr;</span> <span class="hl-str">liquidatable</span>
+
+<span class="hl-cm">// Execution:</span>
+<span class="hl-cm">// - Price: oracle index (not trade price, not manipulable)</span>
+<span class="hl-cm">// - Surplus equity &rarr; insurance fund</span>
+<span class="hl-cm">// - Bad debt (negative equity) &rarr; insurance fund absorbs</span>
+<span class="hl-cm">// - If insurance depleted &rarr; ADL (auto-deleverage most profitable opposing positions)</span>
+<span class="hl-cm">// - Liquidator reward: 1% of position_risk. Insurance: 0.5%.</span>
+<span class="hl-cm">// - 15-minute grace after market resume (prevents cascade on stale prices)</span></code></pre>
+
+  <h3>A Known Tradeoff: Funding vs. Price Discovery</h3>
+  <div class="callout warning">
+    <p><strong>Acknowledged, not hidden:</strong> Traders who correctly anticipate the next oracle update pay funding for being right. There's no "spot" to arbitrage against (unlike BTC perps). This is inherent to any instrument on a non-tradable index. The carry cost of anticipation is bounded (0.5%/hr max), and we believe this is acceptable for the same reason prediction markets work -- the carry cost IS the price of expressing a view before consensus updates.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== SYSTEM ==================== -->
+<div>
+  <h2>System Architecture</h2>
+  <p>Solana-native. Phoenix orderbook for matching. Five onchain programs, five offchain services.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 780 480" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif">
+      <!-- Data Sources -->
+      <rect x="220" y="10" width="340" height="44" rx="8" fill="#1a1a1f" stroke="#3f3f46"/>
+      <text x="390" y="28" text-anchor="middle" fill="#71717a" font-size="8" text-transform="uppercase" letter-spacing="1">External Data Sources (free, public)</text>
+      <text x="390" y="44" text-anchor="middle" fill="#a1a1aa" font-size="11">NOAA GFS  &middot;  ECMWF IFS  &middot;  DWD ICON</text>
+      <line x1="390" y1="54" x2="390" y2="78" stroke="#71717a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Ingest -->
+      <rect x="285" y="78" width="210" height="35" rx="6" fill="#1a1a1f" stroke="rgba(245,158,11,0.4)"/>
+      <text x="390" y="100" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Oracle Ingest Service</text>
+      <line x1="390" y1="113" x2="390" y2="138" stroke="#71717a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Onchain box -->
+      <rect x="40" y="138" width="700" height="195" rx="10" fill="none" stroke="#3f3f46" stroke-dasharray="5"/>
+      <text x="60" y="156" fill="#71717a" font-size="8" letter-spacing="1">SOLANA ONCHAIN</text>
+
+      <!-- Programs -->
+      <rect x="60" y="170" width="120" height="55" rx="6" fill="#1a1a1f" stroke="rgba(34,197,94,0.4)"/>
+      <text x="120" y="193" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="600">Oracle</text>
+      <text x="120" y="210" text-anchor="middle" fill="#71717a" font-size="8">Index + Mark + Staleness</text>
+
+      <rect x="200" y="170" width="120" height="55" rx="6" fill="#1a1a1f" stroke="rgba(99,102,241,0.4)"/>
+      <text x="260" y="193" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="600">Market</text>
+      <text x="260" y="210" text-anchor="middle" fill="#71717a" font-size="8">State + Funding + Params</text>
+
+      <rect x="340" y="170" width="120" height="55" rx="6" fill="#1a1a1f" stroke="rgba(245,158,11,0.4)"/>
+      <text x="400" y="193" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Position</text>
+      <text x="400" y="210" text-anchor="middle" fill="#71717a" font-size="8">Margin + PnL + Funding</text>
+
+      <rect x="480" y="170" width="120" height="55" rx="6" fill="#1a1a1f" stroke="rgba(239,68,68,0.4)"/>
+      <text x="540" y="193" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">Liquidation</text>
+      <text x="540" y="210" text-anchor="middle" fill="#71717a" font-size="8">Trigger + ADL</text>
+
+      <rect x="620" y="170" width="100" height="55" rx="6" fill="#1a1a1f" stroke="rgba(245,158,11,0.3)"/>
+      <text x="670" y="193" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="600">Insurance</text>
+      <text x="670" y="210" text-anchor="middle" fill="#71717a" font-size="8">USDC vault</text>
+
+      <!-- Phoenix + Admin -->
+      <rect x="120" y="248" width="180" height="35" rx="6" fill="#1a1a1f" stroke="rgba(99,102,241,0.3)"/>
+      <text x="210" y="270" text-anchor="middle" fill="#a1a1aa" font-size="10">Phoenix CLOB (matching)</text>
+
+      <rect x="360" y="248" width="300" height="35" rx="6" fill="#1a1a1f" stroke="rgba(245,158,11,0.2)"/>
+      <text x="510" y="264" text-anchor="middle" fill="#71717a" font-size="8.5">Admin: Squads v4 multisig (4/6) &middot; 24hr timelock</text>
+      <text x="510" y="278" text-anchor="middle" fill="#71717a" font-size="7.5">Dead-man switch: 7 days no admin &rarr; auto ReduceOnly</text>
+
+      <!-- Safety -->
+      <rect x="80" y="300" width="620" height="25" rx="4" fill="rgba(245,158,11,0.04)" stroke="rgba(245,158,11,0.15)"/>
+      <text x="390" y="316" text-anchor="middle" fill="#a1a1aa" font-size="8.5">Safety: Active &rarr; ReduceOnly (oracle &gt;2hr stale) &rarr; Paused (&gt;6hr) &rarr; Frozen (insurance depleted)</text>
+
+      <!-- Offchain -->
+      <text x="60" y="365" fill="#71717a" font-size="8" letter-spacing="1">OFFCHAIN SERVICES</text>
+      <rect x="60" y="378" width="130" height="38" rx="6" fill="#1a1a1f" stroke="#3f3f46"/>
+      <text x="125" y="401" text-anchor="middle" fill="#a1a1aa" font-size="9">Liquidator Bot</text>
+      <rect x="210" y="378" width="130" height="38" rx="6" fill="#1a1a1f" stroke="#3f3f46"/>
+      <text x="275" y="401" text-anchor="middle" fill="#a1a1aa" font-size="9">Market Maker Bot</text>
+      <rect x="360" y="378" width="130" height="38" rx="6" fill="#1a1a1f" stroke="#3f3f46"/>
+      <text x="425" y="401" text-anchor="middle" fill="#a1a1aa" font-size="9">REST / WS API</text>
+      <rect x="510" y="378" width="90" height="38" rx="6" fill="#1a1a1f" stroke="#3f3f46"/>
+      <text x="555" y="401" text-anchor="middle" fill="#a1a1aa" font-size="9">Indexer</text>
+      <rect x="620" y="378" width="100" height="38" rx="6" fill="#1a1a1f" stroke="rgba(245,158,11,0.3)"/>
+      <text x="670" y="401" text-anchor="middle" fill="#f59e0b" font-size="9">Frontend</text>
+
+      <text x="390" y="450" text-anchor="middle" fill="#71717a" font-size="8.5">Solana &middot; Anchor &middot; Phoenix &middot; Helius RPC &middot; Jito MEV Protection &middot; USDC</text>
+
+      <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#71717a" stroke-width="1"/></marker></defs>
+    </svg>
+  </div>
+
+  <h3>How a Trade Executes</h3>
+  <div class="seq-step"><div class="step-num">1</div><div class="step-content"><strong>Submit order</strong> via frontend or API. Market program validates: market active, margin sufficient, within position limits.</div></div>
+  <div class="seq-step"><div class="step-num">2</div><div class="step-content"><strong>Phoenix CLOB</strong> matches against resting liquidity. Returns fill price.</div></div>
+  <div class="seq-step"><div class="step-num">3</div><div class="step-content"><strong>Position created</strong> with entry = fill price. Margin locked. Funding index snapshot stored for lazy settlement.</div></div>
+  <div class="seq-step"><div class="step-num">4</div><div class="step-content"><strong>PnL accrues</strong> continuously based on oracle index (external). Funding accrues based on mark-oracle divergence.</div></div>
+  <div class="seq-step"><div class="step-num">5</div><div class="step-content"><strong>Close anytime.</strong> Exit at CLOB fill. Accumulated funding settles. Margin released.</div></div>
+
+  <h3>How Oracle Updates Work</h3>
+  <div class="seq-step"><div class="step-num">1</div><div class="step-content"><strong>NWP model publishes</strong> new forecast (4x daily). Oracle ingest service fetches, computes anomaly per model.</div></div>
+  <div class="seq-step"><div class="step-num">2</div><div class="step-content"><strong>Onchain update</strong> writes per-source values. Enforces: sanity bounds (&plusmn;20&deg;F), monotonic timestamps (no replays), durable nonce prohibition (no held-back stale submissions).</div></div>
+  <div class="seq-step"><div class="step-num">3</div><div class="step-content"><strong>Trimmed mean</strong> recomputed (median of 3). Mark re-clamped to new oracle bounds. Staleness status updated.</div></div>
+
+  <h3>Safety: What Happens When Things Break</h3>
+  <div class="flow-horizontal">
+    <div class="flow-node highlight"><div class="node-title">Active</div><div class="node-sub">Normal trading</div></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node"><div class="node-title">ReduceOnly</div><div class="node-sub">Oracle &gt;2hr stale<br>OR dead-man switch</div></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node"><div class="node-title">Paused</div><div class="node-sub">Oracle &gt;6hr stale<br>OR mark-oracle &gt;8&deg;F<br>OR guardian force-pause</div></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node"><div class="node-title">Frozen</div><div class="node-sub">Insurance depleted<br>ADL active</div></div>
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>If this breaks...</th><th>This happens automatically</th></tr></thead>
+    <tbody>
+      <tr><td>1 of 3 oracle sources goes down</td><td>Trimmed mean degrades to 2-source median. Still valid.</td></tr>
+      <tr><td>All oracle sources down &gt;2 hours</td><td>Market enters ReduceOnly. At 6 hours: full Pause.</td></tr>
+      <tr><td>Someone manipulates orderbook trading</td><td>Only funding affected (bounded). PnL and liquidation reference external oracle only.</td></tr>
+      <tr><td>Oracle ingest key compromised</td><td>Pause guardian (separate key) can halt independently.</td></tr>
+      <tr><td>Insurance fund depleted</td><td>ADL: auto-deleverage most profitable opposing positions pro-rata.</td></tr>
+      <tr><td>No admin activity for 7 days</td><td>Dead-man switch: auto ReduceOnly. Prevents abandoned protocol trapping leveraged positions.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== EVIDENCE ==================== -->
+<div id="evidence">
+  <h2>Why This Works (Evidence)</h2>
+
+  <h3>The Index Is Tradable</h3>
+  <p>1,231 days of real operational GFS forecast data (Jan 2022 - May 2025). Near-Gaussian distribution, healthy volatility, no dead periods.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card pass"><div class="value">2.41&deg;F</div><div class="label">Daily volatility</div></div>
+    <div class="stat-card pass"><div class="value">0.44</div><div class="label">Autocorrelation (1-day)</div></div>
+    <div class="stat-card pass"><div class="value">-0.09</div><div class="label">Excess kurtosis (near-Gaussian)</div></div>
+    <div class="stat-card pass"><div class="value">0</div><div class="label">Dead regimes (30+ day flat)</div></div>
+  </div>
+
+  <h4>Seasonal Profile</h4>
+  <div class="diagram">
+    <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif">
+      <rect x="80" y="22" width="120" height="95" rx="4" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+      <rect x="220" y="48" width="120" height="69" rx="4" fill="rgba(99,102,241,0.15)" stroke="rgba(99,102,241,0.35)" stroke-width="1"/>
+      <rect x="360" y="40" width="120" height="77" rx="4" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.35)" stroke-width="1"/>
+      <rect x="500" y="30" width="120" height="87" rx="4" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.35)" stroke-width="1"/>
+      <text x="140" y="137" text-anchor="middle" fill="#a1a1aa" font-size="10">Spring</text>
+      <text x="280" y="137" text-anchor="middle" fill="#a1a1aa" font-size="10">Summer</text>
+      <text x="420" y="137" text-anchor="middle" fill="#a1a1aa" font-size="10">Fall</text>
+      <text x="560" y="137" text-anchor="middle" fill="#a1a1aa" font-size="10">Winter</text>
+      <text x="140" y="15" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="600">2.77&deg;F</text>
+      <text x="280" y="42" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="600">2.03&deg;F</text>
+      <text x="420" y="34" text-anchor="middle" fill="#22c55e" font-size="12" font-weight="600">2.24&deg;F</text>
+      <text x="560" y="24" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="600">2.55&deg;F</text>
+      <line x1="60" y1="117" x2="640" y2="117" stroke="#3f3f46" stroke-width="1" stroke-dasharray="3"/>
+    </svg>
+    <div class="diagram-caption">Daily volatility by season. No dead seasons. Spring most active, summer least.</div>
+  </div>
+
+  <h3>The System Is Manipulation-Resistant</h3>
+  <p>The oracle is built entirely from external, government-published weather feeds, so orderbook activity cannot move the reference price, only the funding signal. An attacker pays quadratic slippage cost for a bounded, linear payoff, and position limits cap the prize. Adversarial manipulation economics were modeled during validation and clear a wide margin of safety.</p>
+
+  <h3>Funding Converges Reliably</h3>
+  <div class="stats-grid">
+    <div class="stat-card pass"><div class="value">100%</div><div class="label">Convergence rate (36 parameter combos tested)</div></div>
+    <div class="stat-card pass"><div class="value">3-4hr</div><div class="label">Half-life from 5&deg;F shock back to equilibrium</div></div>
+  </div>
+
+  <h3>Regulatory Path Exists</h3>
+  <ul>
+    <li>Weather = "excluded commodity" under Commodity Exchange Act (Section 1a(19)(iv)). CME has traded weather futures since 1999.</li>
+    <li>All three forecast data sources are free for commercial derivative pricing. Zero data cost.</li>
+    <li>V1 operating structure: non-US foundation (BVI/Cayman), geofenced excluding US. Standard for Drift, Jupiter, Hyperliquid.</li>
+    <li>US DCM self-certification path opening (Coinbase Jul 2025, Polymarket Nov 2025).</li>
+    <li>Outside counsel legal memo budgeted ($30-60K) but not yet obtained.</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== RISKS ==================== -->
+<div id="risks">
+  <h2>Honest Risks</h2>
+  <p>What could kill this, in order of severity.</p>
+
+  <div class="risk-grid">
+    <div class="risk-card"><div class="risk-num">1</div><h4>Demand Uncertainty</h4><p class="risk-desc">Novel instrument. 53 potential users identified, conversations in progress.</p><p class="risk-rebuttal"><strong>But:</strong> Ventuals proved non-tradable index perps find traders ($215M in 4 months). The PoC is designed to test this cheaply before committing capital.</p></div>
+    <div class="risk-card"><div class="risk-num">2</div><h4>No Spot Arbitrage</h4><p class="risk-desc">Unlike BTC perps, no spot market to hedge against. Funding convergence relies on mean-reversion traders, not arbitrageurs.</p><p class="risk-rebuttal"><strong>But:</strong> 100% convergence across 36 parameter combos in simulation. Prediction markets also lack spot and still converge. The funding mechanism is the arbitrage.</p></div>
+    <div class="risk-card"><div class="risk-num">3</div><h4>Liquidity Cold Start</h4><p class="risk-desc">Protocol market maker solves mechanics. Doesn't solve demand.</p><p class="risk-rebuttal"><strong>But:</strong> Hyperliquid bootstrapped with points and 4K organic users at $0 marketing. Protocol MM provides the baseline; crypto Twitter + novel underlying drives discovery.</p></div>
+    <div class="risk-card"><div class="risk-num">4</div><h4>Copyable Mechanism</h4><p class="risk-desc">Public data, documented design. Anyone could replicate.</p><p class="risk-rebuttal"><strong>But:</strong> Execution speed matters more than mechanism secrecy. Calibration learning (oracle tuning, MM parameters) compounds over time. Drift and dYdX coexist with identical perp mechanics.</p></div>
+    <div class="risk-card"><div class="risk-num">5</div><h4>Regulatory Uncertainty</h4><p class="risk-desc">CFTC posture could change. Offshore + geofencing is standard but not guaranteed.</p><p class="risk-rebuttal"><strong>But:</strong> Weather = excluded commodity (26yr CME precedent). CFTC actively enabling onchain perps (Coinbase Jul 2025). US DCM path opening. Legal memo budgeted.</p></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== ROADMAP ==================== -->
+<div>
+  <h2>What's Next</h2>
+
+  <div class="timeline">
+    <div class="timeline-item done"><div class="tl-date">Complete</div><div class="tl-title">Full system design + mechanism validation</div><div class="tl-desc">43-page design specification, economic modeling, 1,231-day backtest, risk analysis</div></div>
+    <div class="timeline-item active"><div class="tl-date">Now</div><div class="tl-title">Expert feedback + demand validation</div><div class="tl-desc">This document. Seeking sharp critique from traders, builders, and domain experts.</div></div>
+    <div class="timeline-item future"><div class="tl-date">Next</div><div class="tl-title">Proof-of-concept build</div><div class="tl-desc">Legal review, then a working prototype.</div></div>
+    <div class="timeline-item future"><div class="tl-date">Soon</div><div class="tl-title">Working prototype on Solana devnet</div><div class="tl-desc">Live trading, real oracle feed, protocol market maker.</div></div>
+    <div class="timeline-item future"><div class="tl-date">Q4 2026+</div><div class="tl-title">Mainnet launch, multi-market expansion</div><div class="tl-desc">Multi-city weather &rarr; ERCOT electricity demand &rarr; agricultural yield &rarr; permissionless market creation.</div></div>
+  </div>
+
+  <h3>The Platform Vision</h3>
+  <p>Weather is the first market because the data properties are ideal (free, manipulation-resistant, government-published). But Skyperp is infrastructure for <strong>perpetual futures on any real-world data feed</strong>. The expansion path:</p>
+  <ul>
+    <li><strong>Multi-city weather</strong> (Chicago, Miami, Houston, LA) + precipitation</li>
+    <li><strong>ERCOT electricity demand</strong> -- Texas electricity prices spike 100x during heat waves. Natural cross-sell from weather traders.</li>
+    <li><strong>Agricultural yield indices</strong> -- USDA crop progress, satellite-derived vegetation indices</li>
+    <li><strong>Permissionless market creation</strong> with oracle adapters -- anyone can launch a perp on any data feed</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== FEEDBACK ==================== -->
+<div id="feedback">
+  <h2>What I Want From You</h2>
+  <p>I'm sending this because your perspective would sharpen this project. I don't need encouragement. I need the hardest questions you can throw at it.</p>
+
+  <div class="feedback-section">
+    <h3>For Everyone</h3>
+    <div class="q-group">
+      <div class="q-label">Core questions</div>
+      <ol>
+        <li>After reading this, would you personally trade this instrument? Why or why not?</li>
+        <li>What's the single biggest reason this fails?</li>
+        <li>What am I missing that would be obvious to someone in your position?</li>
+      </ol>
+    </div>
+    <div class="q-group">
+      <div class="q-label">If you trade perps or prediction markets</div>
+      <ol start="4">
+        <li>Would you trade a continuous, leveraged forecast-revision perp? What position size?</li>
+        <li>Is the carry cost (0.85%/7d at 1x) acceptable for the exposure?</li>
+        <li>What would make you choose this over a Kalshi/Polymarket weather market?</li>
+      </ol>
+    </div>
+    <div class="q-group">
+      <div class="q-label">If you work in weather risk or commodities</div>
+      <ol start="7">
+        <li>Does a 7-day max-temp anomaly map to any real hedging need you've seen?</li>
+        <li>What tenor/observable would you actually want to trade?</li>
+        <li>Is the basis risk vs. CME HDD/CDD acceptable for institutional use?</li>
+      </ol>
+    </div>
+    <div class="q-group">
+      <div class="q-label">If you build DeFi protocols</div>
+      <ol start="10">
+        <li>What failure mode am I underestimating?</li>
+        <li>Is the three-price architecture over-engineered or under-engineered for this use case?</li>
+        <li>Where would you attack this system?</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="footer" id="team">
+  <div class="contact">So Shingade</div>
+  <div class="email">sohanshingade@gmail.com</div>
+  <p style="color:var(--text-sec);margin-top:14px;font-size:0.88rem">UC San Diego (Halicioglu Data Science) &middot; Quant Lead, Triton Trading Group<br>Solana: Flint (execution layer), mev-kit (MEV tooling)</p>
+  <p style="color:var(--text-muted);font-size:0.82rem;margin-top:12px"><strong style="color:var(--text-sec)">Seeking:</strong> co-founder (backend/exchange), derivatives market-structure advisor, weather-risk domain advisor</p>
+  <div class="note">Full design specification, backtest data, economic models, and technical documentation available on request.</div>
+</div>
+
+</main>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100+'%';
+});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'})});
+});
+</script>
+</body>
+</html>
