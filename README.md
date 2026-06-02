@@ -49,7 +49,7 @@ Weather is the wedge: liquid public data, an obvious hedging audience, and a 26-
 
 Pre-launch. Validation and protocol design are done; a proof-of-concept on Solana devnet is next. Building deliberately.
 
-Interested as a trader, a hedger, a market maker, or just want to argue about the mechanism? Open an issue or reach out: **[@so_shingade](https://twitter.com/so_shingade)** · sohanshingade@gmail.com
+Interested as a trader, a hedger, a market maker, or just want to argue about the mechanism? Open an issue or reach out: **[@thobothehobo](https://twitter.com/thobothehobo)** · sohanshingade@gmail.com
 
 ---
 
